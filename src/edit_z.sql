@@ -275,6 +275,8 @@ $BODY$
 				--sync line_Z, then the others
 					RAISE EXCEPTION 'ERROR : not allowed to change slop yet (not implemented), change alti or Z values' ;
 				END IF;  
+
+				NEW.min_Z = St_Zmin(NEW.line_Z) ; 
 			END IF ;  
 		RETURN  NEW;
 		END;  

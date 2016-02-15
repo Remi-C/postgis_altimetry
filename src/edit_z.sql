@@ -58,24 +58,6 @@ CREATE INDEX ON line_Z USING GIST(line_slope) ;
 
 
 
- --populating with test line
-TRUNCATE line_Z ;
-INSERT INTO line_Z (line_Z, line_alti, line_slope,min_Z)
-WITH series AS (
-	SELECT s, ST_MakePoint(s + random()/2, 0, 10 +random()*2) AS pt
-	FROM generate_series(1,100) AS s
-)
-, line AS (
-SELECT ST_MakeLine(pt ORDER  BY s ASC) as line 
-FROM series 
-)
-, min_Z AS (
-	SELECT min(ST_Z(dmp.geom))  as min_Z
-	FROM line, st_dumpPoints(line) as dmp
-)
-SELECT line,   line_alti,  rc_alti_to_slope(line_alti)  , min_Z
-FROM min_Z,  line , rc_zgeom_to_alti(line) AS line_alti;
-
  
 --creating
 -- computing the Z = f(curv_abs)
@@ -202,6 +184,29 @@ CREATE OR REPLACE FUNCTION  edit_Z.rc_alti_to_slope(igeom geometry, out line_slo
 		END ;  
 	$BODY$
 LANGUAGE plpgsql STABLE STRICT; 
+
+
+
+
+ --populating with test line
+TRUNCATE line_Z ;
+INSERT INTO line_Z (line_Z, line_alti, line_slope,min_Z)
+WITH series AS (
+	SELECT s, ST_MakePoint(s + random()/2, 0, 10 +random()*2) AS pt
+	FROM generate_series(1,100) AS s
+)
+, line AS (
+SELECT ST_MakeLine(pt ORDER  BY s ASC) as line 
+FROM series 
+)
+, min_Z AS (
+	SELECT min(ST_Z(dmp.geom))  as min_Z
+	FROM line, st_dumpPoints(line) as dmp
+)
+SELECT line,   line_alti,  rc_alti_to_slope(line_alti)  , min_Z
+FROM min_Z,  line , rc_zgeom_to_alti(line) AS line_alti;
+
+
 
 
 -- defining a trigger, so that all geometric fields of line_Z are in sync
